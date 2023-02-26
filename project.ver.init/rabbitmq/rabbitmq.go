@@ -1,3 +1,4 @@
+// rabbitmq函数的封装包，简化接口
 package rabbitmq
 
 import (
@@ -11,7 +12,8 @@ type RabbitMQ struct {
 	exchange string
 }
 
-func New(s string) *RabbitMQ { //创建一个新的rabbit结构体
+// 创建一个新的rabbit结构体
+func New(s string) *RabbitMQ {
 	conn, e := amqp.Dial(s)
 	if e != nil {
 		panic(e)
@@ -38,7 +40,8 @@ func New(s string) *RabbitMQ { //创建一个新的rabbit结构体
 	return mq
 }
 
-func (q *RabbitMQ) Bind(exchange string) { //将消息队列和exchange绑定，使发往exchange的消息都可以在消息队列接收到
+// 将消息队列和exchange绑定，使发往exchange的消息都可以在消息队列接收到
+func (q *RabbitMQ) Bind(exchange string) {
 	e := q.channel.QueueBind(
 		q.Name,
 		"",
@@ -51,7 +54,8 @@ func (q *RabbitMQ) Bind(exchange string) { //将消息队列和exchange绑定，
 	q.exchange = exchange
 }
 
-func (q *RabbitMQ) Send(queque string, body interface{}) { //向某个消息队列发送信息
+// 向某个消息队列发送信息
+func (q *RabbitMQ) Send(queque string, body interface{}) {
 	str, e := json.Marshal(body)
 	if e != nil {
 		panic(e)
@@ -69,7 +73,8 @@ func (q *RabbitMQ) Send(queque string, body interface{}) { //向某个消息队�
 	}
 }
 
-func (q *RabbitMQ) Publish(exchange string, body interface{}) { //向某个exchange发送信息
+// 向某个exchange发送信息
+func (q *RabbitMQ) Publish(exchange string, body interface{}) {
 	str, e := json.Marshal(body)
 	if e != nil {
 		panic(e)
@@ -85,7 +90,8 @@ func (q *RabbitMQ) Publish(exchange string, body interface{}) { //向某个excha
 
 }
 
-func (q *RabbitMQ) Consume() <-chan amqp.Delivery { //生成一个接收消息的go channel
+// 生成一个接收消息的go channel
+func (q *RabbitMQ) Consume() <-chan amqp.Delivery {
 	c, e := q.channel.Consume(
 		q.Name,
 		"",
@@ -101,6 +107,7 @@ func (q *RabbitMQ) Consume() <-chan amqp.Delivery { //生成一个接收消息�
 	return c
 }
 
-func (q *RabbitMQ) Close() { //关闭消息队列
+// 关闭消息队列
+func (q *RabbitMQ) Close() {
 	q.channel.Close()
 }
