@@ -39,6 +39,7 @@ type Object struct {
 	Version  float32 `gorm:"NOT NULL"`                                      // 对象版本号
 }
 
+var DuplicatedName = errors.New("duplicated name")
 var InvalidChoice = errors.New("invalid choice")
 var UserCancelled = errors.New("cancelled by user")
 
@@ -62,6 +63,10 @@ func CreateObject(db *gorm.DB, userName string, passWord string, bucketName stri
 	bucket, err2 := Bucket.ReadBucket(db, userName, passWord, bucketName)
 	if err2 != nil {
 		fmt.Printf("Failed to create object: %v", err2)
+	}
+	temp, err3 := ReadObject(db, userName, passWord, bucketName, objectName)
+	if err3 != nil {
+		fmt.Printf("Failed to ")
 	}
 	if bucket.StorageType == Bucket.ColdArchive {
 		_, _ = fmt.Scanf("Mode ColdArchive: Need Admin Interference?(y/N)%v", choice)
@@ -107,7 +112,7 @@ func ReadObject(db *gorm.DB, userName string, passWord string, bucketName string
 		fmt.Printf("Failed to read object: %v", err2)
 		return Object{}, err2
 	}
-	log := db.Where("name = ? AND user_id = ? AND bucket_id = ?", objectName, user.ID, bucket.ID).Find(&result)
+	log := db.Where("name = ? AND user_id = ? AND bucket_id = ?", objectName, user.ID, bucket.ID).First(&result)
 	return result, log.Error
 }
 
