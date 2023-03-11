@@ -150,6 +150,11 @@ func UpdateBucketName(db *gorm.DB, userName string, passWord string, bucketName 
 		fmt.Printf("Failed to read bucket: %v", err1)
 		return Bucket{}, err1
 	}
+	temp, _ := ReadBucket(db, userName, passWord, bucketName)
+	if temp.Name != "" {
+		fmt.Printf("Failed to create bucket: %v", DuplicatedName)
+		return Bucket{}, DuplicatedName
+	}
 	log := db.Model(&Bucket{}).Where("name = ? AND user_id = ?", bucketName, user.ID).Updates(Bucket{Name: newName, Version: newVersion})
 	if log.Error != nil {
 		fmt.Println(log.Error)
@@ -205,3 +210,4 @@ func DeleteBucket(db *gorm.DB, userName string, passWord string, bucketName stri
 	fmt.Printf("Successfully deleted bucket %v at %v", bucketName, time.Now())
 	return log.Error
 }
+
